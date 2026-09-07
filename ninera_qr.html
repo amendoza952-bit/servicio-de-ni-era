@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Niñera de Confianza — Agenda tu cita</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7EFDD;
+    --paper-card:#FBF6EA;
+    --ink:#2E3B2C;
+    --ink-soft:#5B6B54;
+    --raspberry:#B54B5C;
+    --raspberry-dark:#8F3A47;
+    --marigold:#D9A441;
+    --sage:#7E9468;
+    --sage-dark:#5F7350;
+    --line:#C9BEA0;
+    --shadow:rgba(46,59,44,0.18);
+    --danger:#A6423A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      repeating-linear-gradient(var(--paper) 0 27px, rgba(201,190,160,0.35) 27px 28px);
+    color:var(--ink);
+    font-family:'Nunito',sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:28px 18px 60px;}
+  .hidden{display:none !important;}
+
+  /* ---------- Loading ---------- */
+  #loading{display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Caveat',cursive;font-size:1.6rem;color:var(--ink-soft);}
+
+  /* ---------- Hero ---------- */
+  .hero{text-align:center;padding:18px 0 8px;}
+  .doodle{width:56px;height:56px;margin:0 auto 6px;}
+  .biz-name{
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:3rem;
+    line-height:1;
+    color:var(--raspberry-dark);
+    margin:0 0 4px;
+    word-break:break-word;
+  }
+  .tagline{color:var(--ink-soft);font-size:1.02rem;margin:0 auto 20px;max-width:34ch;}
+
+  .wa-btn{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--raspberry);color:var(--paper-card);
+    font-weight:800;font-size:1.05rem;
+    padding:14px 26px;border-radius:14px;
+    text-decoration:none;
+    transform:rotate(-1deg);
+    box-shadow:0 6px 0 var(--raspberry-dark);
+    transition:transform .15s ease, box-shadow .15s ease;
+    border:none;cursor:pointer;
+  }
+  .wa-btn:hover{transform:rotate(0deg) translateY(-2px);box-shadow:0 8px 0 var(--raspberry-dark);}
+  .wa-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--raspberry-dark);}
+  .wa-btn svg{flex-shrink:0;}
+
+  /* ---------- Section labels ---------- */
+  .tab-label{
+    display:inline-block;
+    font-family:'Caveat',cursive;font-weight:700;font-size:1.5rem;
+    color:var(--ink);
+    background:var(--marigold);
+    padding:3px 16px 5px;
+    border-radius:8px 8px 0 0;
+    transform:rotate(-1deg);
+    margin:36px 0 -4px 12px;
+  }
+
+  /* ---------- Price cards ---------- */
+  .cards{
+    background:var(--paper-card);
+    border:1.5px dashed var(--line);
+    border-radius:14px;
+    padding:22px 16px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    box-shadow:0 3px 10px var(--shadow);
+  }
+  @media(max-width:480px){.cards{grid-template-columns:1fr;}}
+  .price-card{
+    position:relative;
+    background:var(--paper);
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    padding:16px 14px 20px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .price-card:nth-child(odd){transform:rotate(-1.2deg);}
+  .price-card:nth-child(even){transform:rotate(1deg);}
+  .price-card:hover{transform:rotate(0deg) translateY(-3px);box-shadow:0 8px 16px var(--shadow);}
+  .price-card .service-name{font-weight:800;font-size:1rem;color:var(--ink);display:block;margin-bottom:22px;}
+  .price-tag{
+    position:absolute;top:-10px;right:-8px;
+    background:var(--marigold);color:var(--ink);
+    font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.92rem;
+    padding:4px 10px;border-radius:7px;
+    transform:rotate(6deg);
+    box-shadow:0 2px 4px var(--shadow);
+  }
+  .cards-empty{grid-column:1/-1;color:var(--ink-soft);font-style:italic;text-align:center;padding:10px;}
+
+  /* ---------- Booking form ---------- */
+  .form-card{
+    background:var(--paper-card);
+    border:1.5px dashed var(--line);
+    border-radius:14px;
+    padding:24px 20px;
+    box-shadow:0 3px 10px var(--shadow);
+    position:relative;
+  }
+  .form-card::before{
+    content:"";position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-3deg);
+    width:44px;height:16px;background:rgba(217,164,65,0.55);border-radius:2px;
+  }
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:.85rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px;}
+  .field input,.field select,.field textarea{
+    width:100%;border:none;border-bottom:2px solid var(--line);
+    background:transparent;padding:8px 2px;font-family:'Nunito',sans-serif;
+    font-size:1rem;color:var(--ink);outline:none;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{border-bottom-color:var(--raspberry);}
+  .field textarea{resize:vertical;min-height:60px;}
+  .website-trap{position:absolute;left:-9999px;opacity:0;height:0;width:0;}
+  .submit-btn{
+    width:100%;background:var(--sage);color:var(--paper-card);
+    font-weight:800;font-size:1.05rem;padding:14px;border:none;border-radius:12px;
+    cursor:pointer;box-shadow:0 6px 0 var(--sage-dark);transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 0 var(--sage-dark);}
+  .submit-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--sage-dark);}
+  .form-msg{margin-top:12px;font-weight:700;text-align:center;}
+  .form-msg.ok{color:var(--sage-dark);}
+  .form-msg.err{color:var(--danger);}
+  .confirm-wa{display:block;text-align:center;margin-top:10px;color:var(--raspberry-dark);font-weight:700;text-decoration:underline;}
+
+  .stamp-check{
+    width:54px;height:54px;margin:0 auto 8px;
+    animation:pop .35s ease;
+  }
+  @keyframes pop{0%{transform:scale(0.3);opacity:0;}70%{transform:scale(1.15);opacity:1;}100%{transform:scale(1);}}
+
+  /* ---------- Footer ---------- */
+  footer{text-align:center;margin-top:44px;}
+  .admin-link{background:none;border:none;color:var(--ink-soft);font-size:.85rem;cursor:pointer;text-decoration:underline;opacity:.7;font-family:'Nunito',sans-serif;}
+  .admin-link:hover{opacity:1;}
+
+  /* ---------- Admin ---------- */
+  .admin-box{background:var(--paper-card);border:1.5px solid var(--line);border-radius:14px;padding:22px 18px;margin-top:10px;}
+  .admin-title{font-family:'Caveat',cursive;font-size:2rem;color:var(--raspberry-dark);margin:0 0 14px;}
+  .admin-nav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
+  .pill-btn{
+    background:var(--paper);border:1.5px solid var(--line);color:var(--ink);
+    padding:8px 14px;border-radius:20px;font-weight:700;font-size:.88rem;cursor:pointer;
+  }
+  .pill-btn.active{background:var(--ink);color:var(--paper-card);border-color:var(--ink);}
+  .row-flex{display:flex;gap:10px;align-items:end;}
+  .row-flex .field{flex:1;margin-bottom:12px;}
+  .icon-btn{background:none;border:none;color:var(--danger);font-size:1.2rem;cursor:pointer;line-height:1;padding:6px;}
+  .add-service{background:none;border:1.5px dashed var(--line);color:var(--ink-soft);padding:8px 14px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;margin-top:4px;}
+  .save-btn{background:var(--raspberry);color:var(--paper-card);border:none;padding:12px 20px;border-radius:10px;font-weight:800;cursor:pointer;margin-top:8px;}
+  .save-btn.secondary{background:var(--ink-soft);}
+  .leads-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.9rem;}
+  .leads-table th{text-align:left;color:var(--ink-soft);font-size:.75rem;text-transform:uppercase;padding:4px 6px;border-bottom:2px solid var(--line);}
+  .leads-table td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .leads-table a{color:var(--raspberry-dark);}
+  .leads-empty{color:var(--ink-soft);font-style:italic;padding:10px 0;}
+  .admin-actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}
+  #qr-canvas-wrap{background:#fff;padding:12px;border-radius:10px;display:inline-block;margin-top:10px;}
+  .help-text{font-size:.82rem;color:var(--ink-soft);margin-top:6px;}
+  .pin-gate{max-width:280px;margin:0 auto;text-align:center;}
+  .pin-gate input{text-align:center;font-size:1.4rem;letter-spacing:.2em;}
+  .warn-box{background:rgba(166,66,58,0.1);border:1px solid var(--danger);color:var(--danger);border-radius:10px;padding:10px 14px;font-size:.85rem;margin-top:16px;}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+</style>
+</head>
+<body>
+
+<div id="loading">Cargando…</div>
+
+<div class="wrap hidden" id="app">
+
+  <!-- ================= PUBLIC VIEW ================= -->
+  <div id="public-view">
+    <div class="hero">
+      <svg class="doodle" viewBox="0 0 64 64" fill="none"><path d="M32 54s-20-12.5-20-27C12 18 18 12 25 12c4 0 7 2 7 2s3-2 7-2c7 0 13 6 13 15 0 14.5-20 27-20 27z" fill="#D9A441" stroke="#2E3B2C" stroke-width="2" stroke-linejoin="round"/></svg>
+      <h1 class="biz-name" id="d-name">—</h1>
+      <p class="tagline" id="d-tagline"></p>
+      <a class="wa-btn" id="d-wa-btn" href="#" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2z" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 8.7c.2-.5.5-.5.7-.5h.5c.2 0 .4 0 .6.4.2.5.6 1.5.7 1.6.1.1.1.3 0 .5-.1.2-.2.3-.3.5-.2.2-.3.3-.1.6.2.3.9 1.4 1.9 2.2 1.3 1.1 2.3 1.4 2.6 1.5.3.1.5.1.7-.1.2-.2.8-.9 1-1.2.2-.3.4-.2.6-.1.2.1 1.5.7 1.7.8.2.1.4.2.4.3 0 .2 0 .9-.3 1.4-.4.6-1.7 1.2-2.3 1.2-.6 0-1.9-.1-3.7-1-2.1-1.1-3.6-2.9-3.9-3.4-.3-.5-1-1.4-1-2.7 0-1.3.7-1.9 1-2.1z" fill="currentColor"/></svg>
+        Escríbeme por WhatsApp
+      </a>
+    </div>
+
+    <div class="tab-label">Lo que ofrezco</div>
+    <div class="cards" id="d-services"></div>
+
+    <div class="tab-label">Agenda tu cita</div>
+    <div class="form-card">
+      <form id="booking-form">
+        <input type="text" class="website-trap" tabindex="-1" autocomplete="off" id="hp-field" name="website">
+        <div class="field">
+          <label for="f-name">Tu nombre</label>
+          <input type="text" id="f-name" required autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="f-phone">Tu WhatsApp / teléfono</label>
+          <input type="tel" id="f-phone" required autocomplete="tel" placeholder="614 123 4567">
+        </div>
+        <div class="field">
+          <label for="f-service">Servicio que te interesa</label>
+          <select id="f-service"></select>
+        </div>
+        <div class="field">
+          <label for="f-date">Fecha en que lo necesitas (opcional)</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="field">
+          <label for="f-note">Cuéntame un poco más (opcional)</label>
+          <textarea id="f-note" placeholder="Edad de los niños, horario, zona…"></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Enviar solicitud</button>
+      </form>
+      <div id="form-result"></div>
+    </div>
+
+    <footer>
+      <button class="admin-link" id="open-admin">⚙ Administrar</button>
+    </footer>
+  </div>
+
+  <!-- ================= ADMIN: PIN GATE ================= -->
+  <div id="admin-gate" class="hidden">
+    <div class="admin-box pin-gate">
+      <h2 class="admin-title">Acceso de administración</h2>
+      <div class="field">
+        <label for="pin-input">PIN</label>
+        <input type="password" id="pin-input" inputmode="numeric" maxlength="8">
+      </div>
+      <button class="save-btn" id="pin-submit">Entrar</button>
+      <p id="pin-error" class="form-msg err hidden">PIN incorrecto</p>
+      <p class="help-text"><button class="admin-link" id="back-to-public-1">← Volver a la vista pública</button></p>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN: DASHBOARD ================= -->
+  <div id="admin-dash" class="hidden">
+    <div class="admin-box">
+      <h2 class="admin-title">Panel de administración</h2>
+      <div class="admin-nav">
+        <button class="pill-btn active" data-tab="info">Datos e precios</button>
+        <button class="pill-btn" data-tab="leads">Citas recibidas</button>
+        <button class="pill-btn" data-tab="qr">Código QR</button>
+        <button class="pill-btn" id="back-to-public-2">Ver como cliente</button>
+      </div>
+
+      <!-- Tab: info -->
+      <div id="tab-info" class="admin-tab">
+        <div class="field"><label for="a-name">Nombre del negocio</label><input type="text" id="a-name"></div>
+        <div class="field"><label for="a-tagline">Frase corta / descripción</label><input type="text" id="a-tagline"></div>
+        <div class="field"><label for="a-phone">Teléfono WhatsApp (10 dígitos, sin espacios)</label><input type="tel" id="a-phone" maxlength="10"></div>
+
+        <label style="font-size:.85rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase;">Servicios y precios</label>
+        <div id="a-services"></div>
+        <button type="button" class="add-service" id="a-add-service">+ Agregar servicio</button>
+
+        <label style="font-size:.85rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase;display:block;margin-top:18px;">Alerta automática por WhatsApp (opcional)</label>
+        <div class="field"><label for="a-notify-phone">Tu número registrado en CallMeBot</label><input type="text" id="a-notify-phone" placeholder="+521614xxxxxxx"></div>
+        <div class="field"><label for="a-notify-key">APIKEY de CallMeBot</label><input type="text" id="a-notify-key" placeholder="123456"></div>
+        <p class="help-text">Si llenas esto, cuando alguien agende se intentará mandar un WhatsApp automático a este número. Es "mejor esfuerzo": si el navegador bloquea la petición, simplemente no llega, pero la cita se guarda igual.</p>
+
+        <div class="field" style="margin-top:18px;"><label for="a-pin">Cambiar PIN (opcional)</label><input type="text" id="a-pin" inputmode="numeric" maxlength="8" placeholder="Dejar igual"></div>
+
+        <button class="save-btn" id="a-save">Guardar cambios</button>
+        <p id="a-save-msg" class="form-msg hidden"></p>
+      </div>
+
+      <!-- Tab: leads -->
+      <div id="tab-leads" class="admin-tab hidden">
+        <div class="admin-actions">
+          <button class="save-btn secondary" id="export-csv">Descargar CSV</button>
+        </div>
+        <div id="leads-wrap"></div>
+      </div>
+
+      <!-- Tab: qr -->
+      <div id="tab-qr" class="admin-tab hidden">
+        <div class="field">
+          <label for="qr-url">URL de esta página</label>
+          <input type="text" id="qr-url">
+        </div>
+        <p class="help-text">Cuando publiques/compartas este artifact, abre el enlace público y pega esa dirección aquí antes de descargar el QR — así el código apuntará al lugar correcto.</p>
+        <button class="save-btn" id="qr-generate">Generar QR</button>
+        <br>
+        <div id="qr-canvas-wrap"></div>
+        <br>
+        <button class="save-btn secondary" id="qr-download">Descargar PNG</button>
+      </div>
+
+      <div class="warn-box">
+        Este PIN es solo un filtro ligero para que un cliente casual no entre por error — no es seguridad real. Cualquiera con conocimientos técnicos podría ver los datos guardados directamente. No lo uses para información delicada.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const DEFAULT_CONFIG = {
+    businessName: "Tu Niñera de Confianza",
+    tagline: "Cuidado cálido y responsable para tus hijos, aquí en Chihuahua.",
+    phone: "6141234567",
+    pin: "1234",
+    notifyPhone: "",
+    notifyApiKey: "",
+    services: [
+      {name:"Por hora", price:"$100"},
+      {name:"Medio día (hasta 4 hrs)", price:"$300"},
+      {name:"Día completo (hasta 8 hrs)", price:"$550"},
+      {name:"Noche / evento", price:"$120/hr"}
+    ]
+  };
+
+  let config = null;
+  let leads = [];
+  let isAdmin = false;
+
+  // ---------- storage helpers ----------
+  async function safeGet(key, shared, fallback){
+    try{
+      const res = await window.storage.get(key, shared);
+      if(!res) return fallback;
+      return JSON.parse(res.value);
+    }catch(e){
+      console.error('storage get failed:', key, e);
+      return fallback;
+    }
+  }
+  async function safeSet(key, value, shared){
+    try{
+      const res = await window.storage.set(key, JSON.stringify(value), shared);
+      return !!res;
+    }catch(e){
+      console.error('storage set failed:', key, e);
+      return false;
+    }
+  }
+
+  // ---------- init ----------
+  async function init(){
+    config = await safeGet('config', true, null);
+    if(!config){
+      config = DEFAULT_CONFIG;
+      await safeSet('config', config, true);
+    }
+    renderPublic();
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    attachStaticListeners();
+  }
+
+  // ---------- public view ----------
+  function waLink(phone, text){
+    const digits = (phone||'').replace(/\D/g,'');
+    const msg = encodeURIComponent(text || `Hola, vi tu información y me gustaría preguntar sobre tus servicios de niñera.`);
+    return `https://wa.me/52${digits}?text=${msg}`;
+  }
+
+  function renderPublic(){
+    document.getElementById('d-name').textContent = config.businessName || 'Niñera';
+    document.getElementById('d-tagline').textContent = config.tagline || '';
+    document.getElementById('d-wa-btn').href = waLink(config.phone);
+
+    const wrap = document.getElementById('d-services');
+    wrap.innerHTML = '';
+    const svc = config.services || [];
+    if(svc.length === 0){
+      wrap.innerHTML = '<div class="cards-empty">Aún no hay servicios cargados.</div>';
+    }else{
+      svc.forEach(s=>{
+        const card = document.createElement('div');
+        card.className = 'price-card';
+        card.innerHTML = `<span class="price-tag">${escapeHtml(s.price||'')}</span><span class="service-name">${escapeHtml(s.name||'')}</span>`;
+        wrap.appendChild(card);
+      });
+    }
+
+    const sel = document.getElementById('f-service');
+    sel.innerHTML = '';
+    svc.forEach(s=>{
+      const opt = document.createElement('option');
+      opt.value = s.name;
+      opt.textContent = `${s.name} — ${s.price}`;
+      sel.appendChild(opt);
+    });
+    const otherOpt = document.createElement('option');
+    otherOpt.value = 'Otro / no estoy segura';
+    otherOpt.textContent = 'Otro / no estoy segura';
+    sel.appendChild(otherOpt);
+  }
+
+  async function sendOwnerAlert(lead){
+    if(!config.notifyPhone || !config.notifyApiKey) return;
+    const msg = encodeURIComponent(
+      `Nueva solicitud de cita\nNombre: ${lead.name}\nTel: ${lead.phone}\nServicio: ${lead.service || '-'}\nFecha: ${lead.date || 'no especificada'}\nNota: ${lead.note || '-'}`
+    );
+    const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(config.notifyPhone)}&text=${msg}&apikey=${encodeURIComponent(config.notifyApiKey)}`;
+    try{
+      await fetch(url, {mode:'no-cors'});
+    }catch(e){
+      console.error('Alerta automática no enviada (puede ser normal si el navegador la bloquea):', e);
+    }
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // ---------- booking form ----------
+  function attachStaticListeners(){
+    document.getElementById('booking-form').addEventListener('submit', onBookingSubmit);
+    document.getElementById('open-admin').addEventListener('click', ()=>showView('admin-gate'));
+    document.getElementById('back-to-public-1').addEventListener('click', ()=>showView('public-view'));
+    document.getElementById('back-to-public-2').addEventListener('click', ()=>showView('public-view'));
+    document.getElementById('pin-submit').addEventListener('click', onPinSubmit);
+    document.getElementById('pin-input').addEventListener('keydown', e=>{ if(e.key==='Enter') onPinSubmit(); });
+
+    document.querySelectorAll('.admin-nav .pill-btn[data-tab]').forEach(btn=>{
+      btn.addEventListener('click', ()=>switchAdminTab(btn.dataset.tab));
+    });
+    document.getElementById('a-add-service').addEventListener('click', ()=>addServiceRow({name:'',price:''}));
+    document.getElementById('a-save').addEventListener('click', onSaveConfig);
+    document.getElementById('export-csv').addEventListener('click', exportCsv);
+    document.getElementById('qr-generate').addEventListener('click', generateQr);
+    document.getElementById('qr-download').addEventListener('click', downloadQr);
+  }
+
+  function showView(id){
+    ['public-view','admin-gate','admin-dash'].forEach(v=>{
+      document.getElementById(v).classList.toggle('hidden', v!==id);
+    });
+    if(id==='public-view'){ isAdmin=false; renderPublic(); }
+  }
+
+  async function onBookingSubmit(e){
+    e.preventDefault();
+    const resultEl = document.getElementById('form-result');
+    if(document.getElementById('hp-field').value){
+      // honeypot triggered, silently pretend success
+      resultEl.innerHTML = '<p class="form-msg ok">¡Solicitud enviada!</p>';
+      return;
+    }
+    const name = document.getElementById('f-name').value.trim();
+    const phone = document.getElementById('f-phone').value.trim();
+    const service = document.getElementById('f-service').value;
+    const date = document.getElementById('f-date').value;
+    const note = document.getElementById('f-note').value.trim();
+
+    if(!name || !phone){
+      resultEl.innerHTML = '<p class="form-msg err">Por favor escribe tu nombre y teléfono.</p>';
+      return;
+    }
+
+    const submitBtn = e.target.querySelector('.submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enviando…';
+
+    // Abrimos una pestaña en blanco YA (antes del await) para conservar el permiso
+    // del navegador de abrir ventanas; si esperamos hasta después del guardado,
+    // Safari/Chrome en celular suelen bloquear el popup.
+    let waWin = null;
+    try{ waWin = window.open('', '_blank'); }catch(err){ waWin = null; }
+
+    const currentLeads = await safeGet('leads', true, []);
+    const newLead = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+      name, phone, service, date, note,
+      createdAt: new Date().toISOString()
+    };
+    currentLeads.push(newLead);
+    const ok = await safeSet('leads', currentLeads, true);
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Enviar solicitud';
+
+    if(ok){
+      document.getElementById('booking-form').reset();
+      const confirmUrl = waLink(config.phone, `Hola, soy ${name}. Acabo de enviar una solicitud para "${service}"${date ? ' para el '+date : ''}. ${note || ''}`);
+      if(waWin){
+        try{ waWin.location.href = confirmUrl; }catch(err){ waWin = null; }
+      }
+      resultEl.innerHTML = `
+        <svg class="stamp-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="#7E9468" stroke-width="3"/><path fill="none" stroke="#7E9468" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M15 27l7 7 15-15"/></svg>
+        <p class="form-msg ok">¡Listo, ${escapeHtml(name)}! Tu solicitud quedó registrada.</p>
+        <a class="confirm-wa" href="${confirmUrl}" target="_blank" rel="noopener">${waWin ? 'Si no se abrió solo, confirma aquí' : 'Confirmar también por WhatsApp'} →</a>
+      `;
+      sendOwnerAlert(newLead);
+    }else{
+      if(waWin){ try{ waWin.close(); }catch(err){} }
+      resultEl.innerHTML = '<p class="form-msg err">No se pudo guardar tu solicitud. Intenta de nuevo o escríbeme directo por WhatsApp.</p>';
+    }
+  }
+
+  // ---------- admin: pin ----------
+  async function onPinSubmit(){
+    const val = document.getElementById('pin-input').value;
+    const errEl = document.getElementById('pin-error');
+    if(val === (config.pin || DEFAULT_CONFIG.pin)){
+      errEl.classList.add('hidden');
+      document.getElementById('pin-input').value = '';
+      isAdmin = true;
+      await enterAdmin();
+    }else{
+      errEl.classList.remove('hidden');
+    }
+  }
+
+  async function enterAdmin(){
+    fillConfigForm();
+    leads = await safeGet('leads', true, []);
+    renderLeads();
+    switchAdminTab('info');
+    showView('admin-dash');
+  }
+
+  function switchAdminTab(tab){
+    document.querySelectorAll('.admin-nav .pill-btn[data-tab]').forEach(b=>{
+      b.classList.toggle('active', b.dataset.tab===tab);
+    });
+    ['info','leads','qr'].forEach(t=>{
+      document.getElementById('tab-'+t).classList.toggle('hidden', t!==tab);
+    });
+    if(tab==='qr' && !document.getElementById('qr-url').value){
+      document.getElementById('qr-url').value = window.location.href;
+    }
+  }
+
+  // ---------- admin: config form ----------
+  function fillConfigForm(){
+    document.getElementById('a-name').value = config.businessName || '';
+    document.getElementById('a-tagline').value = config.tagline || '';
+    document.getElementById('a-phone').value = config.phone || '';
+    document.getElementById('a-notify-phone').value = config.notifyPhone || '';
+    document.getElementById('a-notify-key').value = config.notifyApiKey || '';
+    document.getElementById('a-pin').value = '';
+    const wrap = document.getElementById('a-services');
+    wrap.innerHTML = '';
+    (config.services||[]).forEach(s=>addServiceRow(s));
+  }
+
+  function addServiceRow(service){
+    const wrap = document.getElementById('a-services');
+    const row = document.createElement('div');
+    row.className = 'row-flex';
+    row.innerHTML = `
+      <div class="field"><input type="text" placeholder="Servicio" class="svc-name" value="${escapeAttr(service.name)}"></div>
+      <div class="field"><input type="text" placeholder="Precio" class="svc-price" value="${escapeAttr(service.price)}"></div>
+      <button type="button" class="icon-btn" title="Quitar">✕</button>
+    `;
+    row.querySelector('.icon-btn').addEventListener('click', ()=>row.remove());
+    wrap.appendChild(row);
+  }
+
+  function escapeAttr(str){
+    return (str||'').replace(/"/g,'&quot;');
+  }
+
+  async function onSaveConfig(){
+    const rows = document.querySelectorAll('#a-services .row-flex');
+    const services = [];
+    rows.forEach(r=>{
+      const name = r.querySelector('.svc-name').value.trim();
+      const price = r.querySelector('.svc-price').value.trim();
+      if(name || price) services.push({name, price});
+    });
+
+    const newPin = document.getElementById('a-pin').value.trim();
+
+    config = {
+      businessName: document.getElementById('a-name').value.trim() || DEFAULT_CONFIG.businessName,
+      tagline: document.getElementById('a-tagline').value.trim(),
+      phone: document.getElementById('a-phone').value.trim().replace(/\D/g,''),
+      notifyPhone: document.getElementById('a-notify-phone').value.trim(),
+      notifyApiKey: document.getElementById('a-notify-key').value.trim(),
+      pin: newPin || config.pin || DEFAULT_CONFIG.pin,
+      services
+    };
+
+    const msgEl = document.getElementById('a-save-msg');
+    const ok = await safeSet('config', config, true);
+    msgEl.classList.remove('hidden','ok','err');
+    if(ok){
+      msgEl.classList.add('ok');
+      msgEl.textContent = 'Guardado ✓';
+    }else{
+      msgEl.classList.add('err');
+      msgEl.textContent = 'No se pudo guardar, intenta de nuevo.';
+    }
+    setTimeout(()=>msgEl.classList.add('hidden'), 2500);
+  }
+
+  // ---------- admin: leads ----------
+  function renderLeads(){
+    const wrap = document.getElementById('leads-wrap');
+    if(!leads.length){
+      wrap.innerHTML = '<p class="leads-empty">Todavía no has recibido solicitudes.</p>';
+      return;
+    }
+    const sorted = [...leads].sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+    let html = '<table class="leads-table"><thead><tr><th>Nombre</th><th>Teléfono</th><th>Servicio</th><th>Fecha</th><th>Nota</th><th></th></tr></thead><tbody>';
+    sorted.forEach(l=>{
+      html += `<tr>
+        <td>${escapeHtml(l.name)}</td>
+        <td><a href="${waLink(l.phone)}" target="_blank" rel="noopener">${escapeHtml(l.phone)}</a></td>
+        <td>${escapeHtml(l.service||'')}</td>
+        <td>${escapeHtml(l.date||'')}</td>
+        <td>${escapeHtml(l.note||'')}</td>
+        <td><button class="icon-btn" data-id="${l.id}" title="Eliminar">✕</button></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+    wrap.querySelectorAll('.icon-btn[data-id]').forEach(btn=>{
+      btn.addEventListener('click', ()=>deleteLead(btn.dataset.id));
+    });
+  }
+
+  async function deleteLead(id){
+    if(!confirm('¿Eliminar esta solicitud?')) return;
+    leads = leads.filter(l=>l.id!==id);
+    await safeSet('leads', leads, true);
+    renderLeads();
+  }
+
+  function exportCsv(){
+    if(!leads.length){ alert('No hay solicitudes para exportar.'); return; }
+    const header = ['Nombre','Telefono','Servicio','Fecha','Nota','Recibido'];
+    const rows = leads.map(l=>[l.name,l.phone,l.service,l.date,l.note,l.createdAt]);
+    const csv = [header, ...rows].map(r=>
+      r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')
+    ).join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'citas_ninera.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // ---------- admin: qr ----------
+  function generateQr(){
+    const url = document.getElementById('qr-url').value.trim() || window.location.href;
+    const wrap = document.getElementById('qr-canvas-wrap');
+    wrap.innerHTML = '';
+    new QRCode(wrap, {
+      text: url,
+      width: 220,
+      height: 220,
+      colorDark: '#2E3B2C',
+      colorLight: '#FBF6EA',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+
+  function downloadQr(){
+    const canvas = document.querySelector('#qr-canvas-wrap canvas');
+    if(!canvas){ alert('Primero genera el código QR.'); return; }
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'qr_ninera.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
