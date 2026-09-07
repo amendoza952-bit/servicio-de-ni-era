@@ -326,7 +326,7 @@
   const DEFAULT_CONFIG = {
     businessName: "Tu Niñera de Confianza",
     tagline: "Cuidado cálido y responsable para tus hijos, aquí en Chihuahua.",
-    phone: "6141234567",
+    phone: "6141779173",
     pin: "1234",
     notifyPhone: "",
     notifyApiKey: "",
@@ -497,27 +497,22 @@
       createdAt: new Date().toISOString()
     };
     currentLeads.push(newLead);
-    const ok = await safeSet('leads', currentLeads, true);
+    safeSet('leads', currentLeads, true); // mejor esfuerzo, no bloquea ni condiciona lo de abajo
 
     submitBtn.disabled = false;
     submitBtn.textContent = 'Enviar solicitud';
 
-    if(ok){
-      document.getElementById('booking-form').reset();
-      const confirmUrl = waLink(config.phone, `Hola, soy ${name}. Acabo de enviar una solicitud para "${service}"${date ? ' para el '+date : ''}. ${note || ''}`);
-      if(waWin){
-        try{ waWin.location.href = confirmUrl; }catch(err){ waWin = null; }
-      }
-      resultEl.innerHTML = `
-        <svg class="stamp-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="#7E9468" stroke-width="3"/><path fill="none" stroke="#7E9468" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M15 27l7 7 15-15"/></svg>
-        <p class="form-msg ok">¡Listo, ${escapeHtml(name)}! Tu solicitud quedó registrada.</p>
-        <a class="confirm-wa" href="${confirmUrl}" target="_blank" rel="noopener">${waWin ? 'Si no se abrió solo, confirma aquí' : 'Confirmar también por WhatsApp'} →</a>
-      `;
-      sendOwnerAlert(newLead);
-    }else{
-      if(waWin){ try{ waWin.close(); }catch(err){} }
-      resultEl.innerHTML = '<p class="form-msg err">No se pudo guardar tu solicitud. Intenta de nuevo o escríbeme directo por WhatsApp.</p>';
+    document.getElementById('booking-form').reset();
+    const confirmUrl = waLink(config.phone, `Hola, soy ${name}. Acabo de enviar una solicitud para "${service}"${date ? ' para el '+date : ''}. ${note || ''}`);
+    if(waWin){
+      try{ waWin.location.href = confirmUrl; }catch(err){ waWin = null; }
     }
+    resultEl.innerHTML = `
+      <svg class="stamp-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="#7E9468" stroke-width="3"/><path fill="none" stroke="#7E9468" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M15 27l7 7 15-15"/></svg>
+      <p class="form-msg ok">¡Listo, ${escapeHtml(name)}! Te estamos abriendo WhatsApp para confirmar tu cita.</p>
+      <a class="confirm-wa" href="${confirmUrl}" target="_blank" rel="noopener">${waWin ? 'Si no se abrió solo, confirma aquí' : 'Enviar por WhatsApp'} →</a>
+    `;
+    sendOwnerAlert(newLead);
   }
 
   // ---------- admin: pin ----------
