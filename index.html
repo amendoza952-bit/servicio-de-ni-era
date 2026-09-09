@@ -7,6 +7,37 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<!-- Firebase SDK (Modular) -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js";
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCmFIvBJvhDOrQ0aJQoLFR9vo_FZ72ARPE",
+  authDomain: "servicio-ninera.firebaseapp.com",
+  projectId: "servicio-ninera",
+  storageBucket: "servicio-ninera.firebasestorage.app",
+  messagingSenderId: "657385361957",
+  appId: "1:657385361957:web:d40e531c8a449ceb3ce5cc",
+  measurementId: "G-5JHWJDXPEP"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const database = getDatabase(app);
+
+// Expose Firebase functions globally
+window.firebase = {
+  database,
+  ref,
+  set,
+  get,
+  remove
+};
+</script>
 <style>
   :root{
     --paper:#F7EFDD;
@@ -199,11 +230,11 @@
   <!-- ================= PUBLIC VIEW ================= -->
   <div id="public-view">
     <div class="hero">
-      <svg class="doodle" viewBox="0 0 64 64" fill="none"><path d="M32 54s-20-12.5-20-27C12 18 18 12 25 12c4 0 7 2 7 2s3-2 7-2c7 0 13 6 13 15 0 14.5-20 27-20 27z" fill="#D9A441" stroke="#2E3B2C" stroke-width="2" stroke-linejoin="round"/></svg>
+      <svg class="doodle" viewBox="0 0 64 64" fill="none"><path d="M32 54s-20-12.5-20-27C12 18 18 12 25 12c4 0 7 2 7 2s3-2 7-2c7 0 13 6 13 15 0 14.5-20 27-20 27z" fill="#D9A441" stroke="#2E3B2C" stroke-width="1.5"/></svg>
       <h1 class="biz-name" id="d-name">—</h1>
       <p class="tagline" id="d-tagline"></p>
       <a class="wa-btn" id="d-wa-btn" href="#" target="_blank" rel="noopener">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2z" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 8.7c.2-.5.5-.5.7-.5h.5c.2 0 .4 0 .6.4.2.5.6 1.5.7 1.6.1.1.1.3 0 .5-.1.2-.2.3-.3.5-.2.2-.3.3-.1.6.2.3.9 1.4 1.9 2.2 1.3 1.1 2.3 1.4 2.6 1.5.3.1.5.1.7-.1.2-.2.8-.9 1-1.2.2-.3.4-.2.6-.1.2.1 1.5.7 1.7.8.2.1.4.2.4.3 0 .2 0 .9-.3 1.4-.4.6-1.7 1.2-2.3 1.2-.6 0-1.9-.1-3.7-1-2.1-1.1-3.6-2.9-3.9-3.4-.3-.5-1-1.4-1-2.7 0-1.3.7-1.9 1-2.1z" fill="currentColor"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2z" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 8.7c.2-.3.4-.4.6-.4.2 0 .3.1.5.2l.6.8c.1.2.2.3.2.5 0 .3-.2.6-.5.8l-.4.3c-.2.2-.2.4 0 .7.5.9 1.3 1.6 2.2 2.1.3.2.5.2.7 0l.4-.3c.3-.3.6-.5.8-.5.2 0 .3.1.5.2l.8.6c.2.1.3.3.3.5 0 .2-.2.4-.4.6-.3.3-.6.5-1 .5-.7 0-1.5-.4-2.1-1-.5-.4-.9-1-1.2-1.6-.3-.6-.3-1.2-.2-1.8.1-.4.3-.7.6-1z" fill="currentColor"/></svg>
         Escríbeme por WhatsApp
       </a>
     </div>
@@ -283,7 +314,7 @@
         <label style="font-size:.85rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase;display:block;margin-top:18px;">Alerta automática por WhatsApp (opcional)</label>
         <div class="field"><label for="a-notify-phone">Tu número registrado en CallMeBot</label><input type="text" id="a-notify-phone" placeholder="+521614xxxxxxx"></div>
         <div class="field"><label for="a-notify-key">APIKEY de CallMeBot</label><input type="text" id="a-notify-key" placeholder="123456"></div>
-        <p class="help-text">Si llenas esto, cuando alguien agende se intentará mandar un WhatsApp automático a este número. Es "mejor esfuerzo": si el navegador bloquea la petición, simplemente no llega, pero la cita se guarda igual.</p>
+        <p class="help-text">Si llenas esto, cuando alguien agende se intentará mandar un WhatsApp automático a este número. Es "mejor esfuerzo": si el navegador bloquea la petición, simplemente no se enviará.</p>
 
         <div class="field" style="margin-top:18px;"><label for="a-pin">Cambiar PIN (opcional)</label><input type="text" id="a-pin" inputmode="numeric" maxlength="8" placeholder="Dejar igual"></div>
 
@@ -314,7 +345,7 @@
       </div>
 
       <div class="warn-box">
-        Este PIN es solo un filtro ligero para que un cliente casual no entre por error — no es seguridad real. Cualquiera con conocimientos técnicos podría ver los datos guardados directamente. No lo uses para información delicada.
+        Este PIN es solo un filtro ligero para que un cliente casual no entre por error — no es seguridad real. Cualquiera con conocimientos técnicos podría ver los datos guardados en Firebase. Para una seguridad real, implementa autenticación de Firebase.
       </div>
     </div>
   </div>
@@ -341,34 +372,72 @@
   let config = null;
   let leads = [];
   let isAdmin = false;
+  let dbReady = false;
 
-  // ---------- storage helpers ----------
-  async function safeGet(key, shared, fallback){
-    try{
-      const res = await window.storage.get(key, shared);
-      if(!res) return fallback;
-      return JSON.parse(res.value);
-    }catch(e){
-      console.error('storage get failed:', key, e);
+  // Esperar a que Firebase esté disponible
+  function waitForFirebase(){
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if(window.firebase && window.firebase.database){
+          clearInterval(interval);
+          dbReady = true;
+          resolve();
+        }
+      }, 100);
+      setTimeout(() => {
+        clearInterval(interval);
+        console.error('Firebase no se cargó');
+        resolve();
+      }, 5000);
+    });
+  }
+
+  // ---------- database helpers ----------
+  async function safeGet(key, fallback){
+    try {
+      if(!dbReady) throw new Error('Firebase not ready');
+      const { ref, get } = window.firebase;
+      const snapshot = await get(ref(window.firebase.database, key));
+      const val = snapshot.val();
+      return val !== null ? val : fallback;
+    } catch(e) {
+      console.error('Firebase get failed:', key, e);
       return fallback;
     }
   }
-  async function safeSet(key, value, shared){
-    try{
-      const res = await window.storage.set(key, JSON.stringify(value), shared);
-      return !!res;
-    }catch(e){
-      console.error('storage set failed:', key, e);
+
+  async function safeSet(key, value){
+    try {
+      if(!dbReady) throw new Error('Firebase not ready');
+      const { ref, set } = window.firebase;
+      await set(ref(window.firebase.database, key), value);
+      return true;
+    } catch(e) {
+      console.error('Firebase set failed:', key, e);
+      return false;
+    }
+  }
+
+  async function safeRemove(key){
+    try {
+      if(!dbReady) throw new Error('Firebase not ready');
+      const { ref, remove } = window.firebase;
+      await remove(ref(window.firebase.database, key));
+      return true;
+    } catch(e) {
+      console.error('Firebase remove failed:', key, e);
       return false;
     }
   }
 
   // ---------- init ----------
   async function init(){
-    config = await safeGet('config', true, null);
+    await waitForFirebase();
+    
+    config = await safeGet('config', null);
     if(!config){
       config = DEFAULT_CONFIG;
-      await safeSet('config', config, true);
+      await safeSet('config', config);
     }
     renderPublic();
     document.getElementById('loading').classList.add('hidden');
@@ -425,7 +494,7 @@
     try{
       await fetch(url, {mode:'no-cors'});
     }catch(e){
-      console.error('Alerta automática no enviada (puede ser normal si el navegador la bloquea):', e);
+      console.error('Alerta automática no enviada:', e);
     }
   }
 
@@ -484,20 +553,16 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Enviando…';
 
-    // Abrimos una pestaña en blanco YA (antes del await) para conservar el permiso
-    // del navegador de abrir ventanas; si esperamos hasta después del guardado,
-    // Safari/Chrome en celular suelen bloquear el popup.
     let waWin = null;
     try{ waWin = window.open('', '_blank'); }catch(err){ waWin = null; }
 
-    const currentLeads = await safeGet('leads', true, []);
     const newLead = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
       name, phone, service, date, note,
       createdAt: new Date().toISOString()
     };
-    currentLeads.push(newLead);
-    safeSet('leads', currentLeads, true); // mejor esfuerzo, no bloquea ni condiciona lo de abajo
+
+    const ok = await safeSet(`leads/${newLead.id}`, newLead);
 
     submitBtn.disabled = false;
     submitBtn.textContent = 'Enviar solicitud';
@@ -508,7 +573,7 @@
       try{ waWin.location.href = confirmUrl; }catch(err){ waWin = null; }
     }
     resultEl.innerHTML = `
-      <svg class="stamp-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="#7E9468" stroke-width="3"/><path fill="none" stroke="#7E9468" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M15 27l7 7 15-15"/></svg>
+      <svg class="stamp-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="#7E9468" stroke-width="3"/><path fill="none" stroke="#7E9468" stroke-width="4" stroke-linecap="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>
       <p class="form-msg ok">¡Listo, ${escapeHtml(name)}! Te estamos abriendo WhatsApp para confirmar tu cita.</p>
       <a class="confirm-wa" href="${confirmUrl}" target="_blank" rel="noopener">${waWin ? 'Si no se abrió solo, confirma aquí' : 'Enviar por WhatsApp'} →</a>
     `;
@@ -531,7 +596,11 @@
 
   async function enterAdmin(){
     fillConfigForm();
-    leads = await safeGet('leads', true, []);
+    
+    // Cargar leads desde Firebase
+    const leadsSnapshot = await safeGet('leads', {});
+    leads = Object.values(leadsSnapshot || {}).filter(l => l && l.id);
+    
     renderLeads();
     switchAdminTab('info');
     showView('admin-dash');
@@ -601,7 +670,7 @@
     };
 
     const msgEl = document.getElementById('a-save-msg');
-    const ok = await safeSet('config', config, true);
+    const ok = await safeSet('config', config);
     msgEl.classList.remove('hidden','ok','err');
     if(ok){
       msgEl.classList.add('ok');
@@ -641,9 +710,11 @@
 
   async function deleteLead(id){
     if(!confirm('¿Eliminar esta solicitud?')) return;
-    leads = leads.filter(l=>l.id!==id);
-    await safeSet('leads', leads, true);
-    renderLeads();
+    const ok = await safeRemove(`leads/${id}`);
+    if(ok) {
+      leads = leads.filter(l=>l.id!==id);
+      renderLeads();
+    }
   }
 
   function exportCsv(){
