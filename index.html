@@ -11,7 +11,6 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -21,12 +20,15 @@ const firebaseConfig = {
   storageBucket: "servicio-ninera.firebasestorage.app",
   messagingSenderId: "657385361957",
   appId: "1:657385361957:web:d40e531c8a449ceb3ce5cc",
-  measurementId: "G-5JHWJDXPEP"
+  // OJO: confirma esta URL contra la que te muestra la consola de Firebase
+  // en Build > Realtime Database, arriba de la tabla de datos.
+  databaseURL: "https://servicio-ninera-default-rtdb.firebaseio.com"
 };
 
-// Initialize Firebase
+// Initialize Firebase (sin Analytics: lo quitamos porque navegadores como
+// Brave lo bloquean seguido y puede detener todo el script antes de tiempo,
+// y aquí no lo necesitamos para nada).
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const database = getDatabase(app);
 
 // Expose Firebase functions globally
@@ -336,7 +338,7 @@ window.firebase = {
           <label for="qr-url">URL de esta página</label>
           <input type="text" id="qr-url">
         </div>
-        <p class="help-text">Cuando publiques/compartas este artifact, abre el enlace público y pega esa dirección aquí antes de descargar el QR — así el código apuntará al lugar correcto.</p>
+        <p class="help-text">Ábrela desde tu link publicado de GitHub Pages para que este campo tome la URL correcta automáticamente.</p>
         <button class="save-btn" id="qr-generate">Generar QR</button>
         <br>
         <div id="qr-canvas-wrap"></div>
@@ -362,10 +364,10 @@ window.firebase = {
     notifyPhone: "",
     notifyApiKey: "",
     services: [
-      {name:"Por hora", price:"$100"},
-      {name:"Medio día (hasta 4 hrs)", price:"$300"},
-      {name:"Día completo (hasta 8 hrs)", price:"$550"},
-      {name:"Noche / evento", price:"$120/hr"}
+      {name:"Por hora (3pm-8pm)", price:"$110"},
+      {name:"Bloque tarde-noche (4 hrs)", price:"$450"},
+      {name:"Noche completa (5-6 hrs)", price:"$650"},
+      {name:"Hora extra después de medianoche", price:"$150/hr"}
     ]
   };
 
@@ -386,7 +388,7 @@ window.firebase = {
       }, 100);
       setTimeout(() => {
         clearInterval(interval);
-        console.error('Firebase no se cargó');
+        if(!dbReady) console.error('Firebase no se cargó a tiempo');
         resolve();
       }, 5000);
     });
@@ -432,17 +434,24 @@ window.firebase = {
 
   // ---------- init ----------
   async function init(){
-    await waitForFirebase();
-    
-    config = await safeGet('config', null);
-    if(!config){
-      config = DEFAULT_CONFIG;
-      await safeSet('config', config);
+    try{
+      await waitForFirebase();
+
+      config = await safeGet('config', null);
+      if(!config){
+        config = DEFAULT_CONFIG;
+        await safeSet('config', config);
+      }
+      renderPublic();
+    }catch(e){
+      console.error('Error inicializando la app:', e);
+      config = config || DEFAULT_CONFIG;
+      renderPublic();
+    }finally{
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      attachStaticListeners();
     }
-    renderPublic();
-    document.getElementById('loading').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-    attachStaticListeners();
   }
 
   // ---------- public view ----------
@@ -534,7 +543,6 @@ window.firebase = {
     e.preventDefault();
     const resultEl = document.getElementById('form-result');
     if(document.getElementById('hp-field').value){
-      // honeypot triggered, silently pretend success
       resultEl.innerHTML = '<p class="form-msg ok">¡Solicitud enviada!</p>';
       return;
     }
@@ -562,7 +570,7 @@ window.firebase = {
       createdAt: new Date().toISOString()
     };
 
-    const ok = await safeSet(`leads/${newLead.id}`, newLead);
+    safeSet(`leads/${newLead.id}`, newLead); // mejor esfuerzo, no bloquea el flujo de WhatsApp
 
     submitBtn.disabled = false;
     submitBtn.textContent = 'Enviar solicitud';
@@ -596,11 +604,10 @@ window.firebase = {
 
   async function enterAdmin(){
     fillConfigForm();
-    
-    // Cargar leads desde Firebase
+
     const leadsSnapshot = await safeGet('leads', {});
     leads = Object.values(leadsSnapshot || {}).filter(l => l && l.id);
-    
+
     renderLeads();
     switchAdminTab('info');
     showView('admin-dash');
