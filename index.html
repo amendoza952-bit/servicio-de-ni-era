@@ -184,6 +184,18 @@ window.firebase = {
   }
   @keyframes pop{0%{transform:scale(0.3);opacity:0;}70%{transform:scale(1.15);opacity:1;}100%{transform:scale(1);}}
 
+  /* ---------- Kids section ---------- */
+  .kids-section{background:rgba(217,164,65,0.1);border-radius:10px;padding:12px;margin-bottom:16px;}
+  .kids-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .kids-header label{margin:0;font-size:.85rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase;}
+  .kids-add-btn{background:none;border:1px dashed var(--line);color:var(--ink-soft);padding:4px 8px;border-radius:6px;font-weight:600;cursor:pointer;font-size:.8rem;}
+  .kids-add-btn:hover{background:rgba(217,164,65,0.2);}
+  .kid-row{display:flex;gap:8px;margin-bottom:8px;align-items:end;}
+  .kid-row .field{flex:1;margin-bottom:0;}
+  .kid-row input{font-size:.9rem;}
+  .kid-remove{background:none;border:none;color:var(--danger);cursor:pointer;padding:6px;line-height:1;}
+  .kids-empty{color:var(--ink-soft);font-style:italic;font-size:.85rem;text-align:center;padding:8px;}
+
   /* ---------- Footer ---------- */
   footer{text-align:center;margin-top:44px;}
   .admin-link{background:none;border:none;color:var(--ink-soft);font-size:.85rem;cursor:pointer;text-decoration:underline;opacity:.7;font-family:'Nunito',sans-serif;}
@@ -252,13 +264,22 @@ window.firebase = {
           <label for="f-service">Servicio que te interesa</label>
           <select id="f-service"></select>
         </div>
+        
+        <div class="kids-section">
+          <div class="kids-header">
+            <label>Niños a cuidar</label>
+            <button type="button" class="kids-add-btn" id="f-add-kid">+ Agregar niño</button>
+          </div>
+          <div id="f-kids-list"></div>
+        </div>
+
         <div class="field">
           <label for="f-date">Fecha en que lo necesitas (opcional)</label>
           <input type="date" id="f-date">
         </div>
         <div class="field">
           <label for="f-note">Cuéntame un poco más (opcional)</label>
-          <textarea id="f-note" placeholder="Edad de los niños, horario, zona…"></textarea>
+          <textarea id="f-note" placeholder="Horario, zona, notas adicionales…"></textarea>
         </div>
         <button type="submit" class="submit-btn">Enviar solicitud</button>
       </form>
@@ -270,16 +291,16 @@ window.firebase = {
     </footer>
   </div>
 
-  <!-- ================= ADMIN: PIN GATE ================= -->
+  <!-- ================= ADMIN: PASSWORD GATE ================= -->
   <div id="admin-gate" class="hidden">
     <div class="admin-box pin-gate">
       <h2 class="admin-title">Acceso de administración</h2>
       <div class="field">
-        <label for="pin-input">PIN</label>
-        <input type="password" id="pin-input" inputmode="numeric" maxlength="8">
+        <label for="password-input">Contraseña</label>
+        <input type="password" id="password-input" placeholder="Ingresa tu contraseña">
       </div>
-      <button class="save-btn" id="pin-submit">Entrar</button>
-      <p id="pin-error" class="form-msg err hidden">PIN incorrecto</p>
+      <button class="save-btn" id="password-submit">Entrar</button>
+      <p id="password-error" class="form-msg err hidden">Contraseña incorrecta</p>
       <p class="help-text"><button class="admin-link" id="back-to-public-1">← Volver a la vista pública</button></p>
     </div>
   </div>
@@ -305,7 +326,7 @@ window.firebase = {
         <div id="a-services"></div>
         <button type="button" class="add-service" id="a-add-service">+ Agregar servicio</button>
 
-        <div class="field" style="margin-top:18px;"><label for="a-pin">Cambiar PIN (opcional)</label><input type="text" id="a-pin" inputmode="numeric" maxlength="8" placeholder="Dejar igual"></div>
+        <div class="field" style="margin-top:18px;"><label for="a-password">Cambiar contraseña (opcional)</label><input type="password" id="a-password" placeholder="Dejar igual para mantener la actual"></div>
 
         <button class="save-btn" id="a-save">Guardar cambios</button>
         <p id="a-save-msg" class="form-msg hidden"></p>
@@ -334,7 +355,7 @@ window.firebase = {
       </div>
 
       <div class="warn-box">
-        Este PIN es solo un filtro ligero para que un cliente casual no entre por error — no es seguridad real. Cualquiera con conocimientos técnicos podría ver los datos guardados en Firebase. Por favor, no compartas información sensible aquí.
+        Esta contraseña es solo un filtro ligero para que un cliente casual no entre por error — no es seguridad real. Cualquiera con conocimientos técnicos podría ver los datos guardados en Firebase. Por favor, no compartas información sensible aquí.
       </div>
     </div>
   </div>
@@ -347,7 +368,7 @@ window.firebase = {
     businessName: "Tu Niñera de Confianza",
     tagline: "Cuidado cálido y responsable para tus hijos, aquí en Chihuahua.",
     phone: "6141779173",
-    pin: "1234",
+    password: "1234",
     services: [
       {name:"Por hora", price:"$100"},
       {name:"Medio día (hasta 4 hrs)", price:"$300"},
@@ -470,6 +491,40 @@ window.firebase = {
     otherOpt.value = 'Otro / no estoy segura';
     otherOpt.textContent = 'Otro / no estoy segura';
     sel.appendChild(otherOpt);
+
+    // Renderizar lista de niños
+    renderKidsList();
+  }
+
+  function renderKidsList(){
+    const list = document.getElementById('f-kids-list');
+    const kids = JSON.parse(sessionStorage.getItem('formKids') || '[]');
+    list.innerHTML = '';
+    if(kids.length === 0){
+      list.innerHTML = '<div class="kids-empty">Sin niños agregados aún</div>';
+    }else{
+      kids.forEach((kid, idx) => {
+        const row = document.createElement('div');
+        row.className = 'kid-row';
+        row.innerHTML = `
+          <div class="field">
+            <input type="number" class="kid-age" placeholder="Edad" value="${kid.age||''}" min="0" max="18">
+          </div>
+          <button type="button" class="kid-remove" title="Quitar">✕</button>
+        `;
+        row.querySelector('.kid-age').addEventListener('input', (e) => {
+          kids[idx].age = e.target.value;
+          sessionStorage.setItem('formKids', JSON.stringify(kids));
+        });
+        row.querySelector('.kid-remove').addEventListener('click', (e) => {
+          e.preventDefault();
+          kids.splice(idx, 1);
+          sessionStorage.setItem('formKids', JSON.stringify(kids));
+          renderKidsList();
+        });
+        list.appendChild(row);
+      });
+    }
   }
 
   function escapeHtml(str){
@@ -481,11 +536,19 @@ window.firebase = {
   // ---------- booking form ----------
   function attachStaticListeners(){
     document.getElementById('booking-form').addEventListener('submit', onBookingSubmit);
+    document.getElementById('f-add-kid').addEventListener('click', (e) => {
+      e.preventDefault();
+      const kids = JSON.parse(sessionStorage.getItem('formKids') || '[]');
+      kids.push({age: ''});
+      sessionStorage.setItem('formKids', JSON.stringify(kids));
+      renderKidsList();
+    });
+
     document.getElementById('open-admin').addEventListener('click', ()=>showView('admin-gate'));
     document.getElementById('back-to-public-1').addEventListener('click', ()=>showView('public-view'));
     document.getElementById('back-to-public-2').addEventListener('click', ()=>showView('public-view'));
-    document.getElementById('pin-submit').addEventListener('click', onPinSubmit);
-    document.getElementById('pin-input').addEventListener('keydown', e=>{ if(e.key==='Enter') onPinSubmit(); });
+    document.getElementById('password-submit').addEventListener('click', onPasswordSubmit);
+    document.getElementById('password-input').addEventListener('keydown', e=>{ if(e.key==='Enter') onPasswordSubmit(); });
 
     document.querySelectorAll('.admin-nav .pill-btn[data-tab]').forEach(btn=>{
       btn.addEventListener('click', ()=>switchAdminTab(btn.dataset.tab));
@@ -508,7 +571,6 @@ window.firebase = {
     e.preventDefault();
     const resultEl = document.getElementById('form-result');
     if(document.getElementById('hp-field').value){
-      // honeypot triggered, silently pretend success
       resultEl.innerHTML = '<p class="form-msg ok">¡Solicitud enviada!</p>';
       return;
     }
@@ -516,6 +578,7 @@ window.firebase = {
     const service = document.getElementById('f-service').value;
     const date = document.getElementById('f-date').value;
     const note = document.getElementById('f-note').value.trim();
+    const kids = JSON.parse(sessionStorage.getItem('formKids') || '[]');
 
     if(!name){
       resultEl.innerHTML = '<p class="form-msg err">Por favor escribe tu nombre.</p>';
@@ -529,9 +592,12 @@ window.firebase = {
     let waWin = null;
     try{ waWin = window.open('', '_blank'); }catch(err){ waWin = null; }
 
+    const kidsStr = kids.length > 0 ? `${kids.length} niño(s): ${kids.map(k => k.age ? `${k.age} años` : 'sin especificar').join(', ')}` : 'No especificado';
+
     const newLead = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-      name, service, date, note,
+      name, service, date, note, kids,
+      kidsInfo: kidsStr,
       createdAt: new Date().toISOString()
     };
 
@@ -541,7 +607,8 @@ window.firebase = {
     submitBtn.textContent = 'Enviar solicitud';
 
     document.getElementById('booking-form').reset();
-    const confirmUrl = waLink(config.phone, `Hola, soy ${name}. Acabo de enviar una solicitud para "${service}"${date ? ' para el '+date : ''}. ${note || ''}`);
+    sessionStorage.removeItem('formKids');
+    const confirmUrl = waLink(config.phone, `Hola, soy ${name}. Acabo de enviar una solicitud para "${service}" para ${kidsStr}${date ? ' para el '+date : ''}. ${note || ''}`);
     if(waWin){
       try{ waWin.location.href = confirmUrl; }catch(err){ waWin = null; }
     }
@@ -550,15 +617,16 @@ window.firebase = {
       <p class="form-msg ok">¡Listo, ${escapeHtml(name)}! Te estamos abriendo WhatsApp para confirmar tu cita.</p>
       <a class="confirm-wa" href="${confirmUrl}" target="_blank" rel="noopener">${waWin ? 'Si no se abrió solo, confirma aquí' : 'Enviar por WhatsApp'} →</a>
     `;
+    renderKidsList();
   }
 
-  // ---------- admin: pin ----------
-  async function onPinSubmit(){
-    const val = document.getElementById('pin-input').value;
-    const errEl = document.getElementById('pin-error');
-    if(val === (config.pin || DEFAULT_CONFIG.pin)){
+  // ---------- admin: password ----------
+  async function onPasswordSubmit(){
+    const val = document.getElementById('password-input').value;
+    const errEl = document.getElementById('password-error');
+    if(val === (config.password || DEFAULT_CONFIG.password)){
       errEl.classList.add('hidden');
-      document.getElementById('pin-input').value = '';
+      document.getElementById('password-input').value = '';
       isAdmin = true;
       await enterAdmin();
     }else{
@@ -569,7 +637,6 @@ window.firebase = {
   async function enterAdmin(){
     fillConfigForm();
     
-    // Cargar leads desde Firebase
     const leadsSnapshot = await safeGet('leads', {});
     leads = Object.values(leadsSnapshot || {}).filter(l => l && l.id);
     
@@ -595,7 +662,7 @@ window.firebase = {
     document.getElementById('a-name').value = config.businessName || '';
     document.getElementById('a-tagline').value = config.tagline || '';
     document.getElementById('a-phone').value = config.phone || '';
-    document.getElementById('a-pin').value = '';
+    document.getElementById('a-password').value = '';
     const wrap = document.getElementById('a-services');
     wrap.innerHTML = '';
     (config.services||[]).forEach(s=>addServiceRow(s));
@@ -627,13 +694,13 @@ window.firebase = {
       if(name || price) services.push({name, price});
     });
 
-    const newPin = document.getElementById('a-pin').value.trim();
+    const newPassword = document.getElementById('a-password').value.trim();
 
     config = {
       businessName: document.getElementById('a-name').value.trim() || DEFAULT_CONFIG.businessName,
       tagline: document.getElementById('a-tagline').value.trim(),
       phone: document.getElementById('a-phone').value.trim().replace(/\D/g,''),
-      pin: newPin || config.pin || DEFAULT_CONFIG.pin,
+      password: newPassword || config.password || DEFAULT_CONFIG.password,
       services
     };
 
@@ -658,10 +725,12 @@ window.firebase = {
       return;
     }
     const sorted = [...leads].sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
-    let html = '<table class="leads-table"><thead><tr><th>Nombre</th><th>Servicio</th><th>Fecha</th><th>Nota</th><th></th></tr></thead><tbody>';
+    let html = '<table class="leads-table"><thead><tr><th>Nombre</th><th>Niños</th><th>Servicio</th><th>Fecha</th><th>Nota</th><th></th></tr></thead><tbody>';
     sorted.forEach(l=>{
+      const kidsDisplay = l.kidsInfo || (l.kids && l.kids.length > 0 ? `${l.kids.length} niño(s)` : 'No especificado');
       html += `<tr>
         <td>${escapeHtml(l.name)}</td>
+        <td>${escapeHtml(kidsDisplay)}</td>
         <td>${escapeHtml(l.service||'')}</td>
         <td>${escapeHtml(l.date||'')}</td>
         <td>${escapeHtml(l.note||'')}</td>
@@ -686,8 +755,11 @@ window.firebase = {
 
   function exportCsv(){
     if(!leads.length){ alert('No hay solicitudes para exportar.'); return; }
-    const header = ['Nombre','Servicio','Fecha','Nota','Recibido'];
-    const rows = leads.map(l=>[l.name,l.service,l.date,l.note,l.createdAt]);
+    const header = ['Nombre','Niños','Servicio','Fecha','Nota','Recibido'];
+    const rows = leads.map(l=>{
+      const kidsDisplay = l.kidsInfo || (l.kids && l.kids.length > 0 ? `${l.kids.length} niño(s)` : 'No especificado');
+      return [l.name, kidsDisplay, l.service, l.date, l.note, l.createdAt];
+    });
     const csv = [header, ...rows].map(r=>
       r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')
     ).join('\n');
