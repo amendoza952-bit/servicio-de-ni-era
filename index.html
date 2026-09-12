@@ -20,14 +20,10 @@ const firebaseConfig = {
   storageBucket: "servicio-ninera.firebasestorage.app",
   messagingSenderId: "657385361957",
   appId: "1:657385361957:web:d40e531c8a449ceb3ce5cc",
-  // OJO: confirma esta URL contra la que te muestra la consola de Firebase
-  // en Build > Realtime Database, arriba de la tabla de datos.
   databaseURL: "https://servicio-ninera-default-rtdb.firebaseio.com"
 };
 
-// Initialize Firebase (sin Analytics: lo quitamos porque navegadores como
-// Brave lo bloquean seguido y puede detener todo el script antes de tiempo,
-// y aquí no lo necesitamos para nada).
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
@@ -232,11 +228,11 @@ window.firebase = {
   <!-- ================= PUBLIC VIEW ================= -->
   <div id="public-view">
     <div class="hero">
-      <svg class="doodle" viewBox="0 0 64 64" fill="none"><path d="M32 54s-20-12.5-20-27C12 18 18 12 25 12c4 0 7 2 7 2s3-2 7-2c7 0 13 6 13 15 0 14.5-20 27-20 27z" fill="#D9A441" stroke="#2E3B2C" stroke-width="1.5"/></svg>
+      <svg class="doodle" viewBox="0 0 64 64" fill="none"><path d="M32 54s-20-12.5-20-27C12 18 18 12 25 12c4 0 7 2 7 2s3-2 7-2c7 0 13 6 13 15 0 14.5-20 27-20 27z" fill="#D9A441" stroke="#2E3B2C" stroke-width="2"/><circle cx="42" cy="28" r="3" fill="#2E3B2C"/><circle cx="22" cy="28" r="3" fill="#2E3B2C"/><path d="M28 38c2 1 4 1 6 0" stroke="#2E3B2C" stroke-width="2" stroke-linecap="round"/></svg>
       <h1 class="biz-name" id="d-name">—</h1>
       <p class="tagline" id="d-tagline"></p>
       <a class="wa-btn" id="d-wa-btn" href="#" target="_blank" rel="noopener">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2z" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 8.7c.2-.3.4-.4.6-.4.2 0 .3.1.5.2l.6.8c.1.2.2.3.2.5 0 .3-.2.6-.5.8l-.4.3c-.2.2-.2.4 0 .7.5.9 1.3 1.6 2.2 2.1.3.2.5.2.7 0l.4-.3c.3-.3.6-.5.8-.5.2 0 .3.1.5.2l.8.6c.2.1.3.3.3.5 0 .2-.2.4-.4.6-.3.3-.6.5-1 .5-.7 0-1.5-.4-2.1-1-.5-.4-.9-1-1.2-1.6-.3-.6-.3-1.2-.2-1.8.1-.4.3-.7.6-1z" fill="currentColor"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2z" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 8.7c.2-.5 1-.8 1.4-.1.3.5.6 1.3.7 1.8.1.4-.3 1-1 1.2-.5.1-1 .4-1 .4s.5 1.5 1.8 2.3c1 .6 1.8.5 2.2.3.5-.2 1-.7 1.2-1.1.2-.4 1-.6 1.4-.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         Escríbeme por WhatsApp
       </a>
     </div>
@@ -251,10 +247,6 @@ window.firebase = {
         <div class="field">
           <label for="f-name">Tu nombre</label>
           <input type="text" id="f-name" required autocomplete="name">
-        </div>
-        <div class="field">
-          <label for="f-phone">Tu WhatsApp / teléfono</label>
-          <input type="tel" id="f-phone" required autocomplete="tel" placeholder="614 123 4567">
         </div>
         <div class="field">
           <label for="f-service">Servicio que te interesa</label>
@@ -313,11 +305,6 @@ window.firebase = {
         <div id="a-services"></div>
         <button type="button" class="add-service" id="a-add-service">+ Agregar servicio</button>
 
-        <label style="font-size:.85rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase;display:block;margin-top:18px;">Alerta automática por WhatsApp (opcional)</label>
-        <div class="field"><label for="a-notify-phone">Tu número registrado en CallMeBot</label><input type="text" id="a-notify-phone" placeholder="+521614xxxxxxx"></div>
-        <div class="field"><label for="a-notify-key">APIKEY de CallMeBot</label><input type="text" id="a-notify-key" placeholder="123456"></div>
-        <p class="help-text">Si llenas esto, cuando alguien agende se intentará mandar un WhatsApp automático a este número. Es "mejor esfuerzo": si el navegador bloquea la petición, simplemente no se enviará.</p>
-
         <div class="field" style="margin-top:18px;"><label for="a-pin">Cambiar PIN (opcional)</label><input type="text" id="a-pin" inputmode="numeric" maxlength="8" placeholder="Dejar igual"></div>
 
         <button class="save-btn" id="a-save">Guardar cambios</button>
@@ -347,7 +334,7 @@ window.firebase = {
       </div>
 
       <div class="warn-box">
-        Este PIN es solo un filtro ligero para que un cliente casual no entre por error — no es seguridad real. Cualquiera con conocimientos técnicos podría ver los datos guardados en Firebase. Para una seguridad real, implementa autenticación de Firebase.
+        Este PIN es solo un filtro ligero para que un cliente casual no entre por error — no es seguridad real. Cualquiera con conocimientos técnicos podría ver los datos guardados en Firebase. Por favor, no compartas información sensible aquí.
       </div>
     </div>
   </div>
@@ -361,13 +348,11 @@ window.firebase = {
     tagline: "Cuidado cálido y responsable para tus hijos, aquí en Chihuahua.",
     phone: "6141779173",
     pin: "1234",
-    notifyPhone: "",
-    notifyApiKey: "",
     services: [
-      {name:"Por hora (3pm-8pm)", price:"$110"},
-      {name:"Bloque tarde-noche (4 hrs)", price:"$450"},
-      {name:"Noche completa (5-6 hrs)", price:"$650"},
-      {name:"Hora extra después de medianoche", price:"$150/hr"}
+      {name:"Por hora", price:"$100"},
+      {name:"Medio día (hasta 4 hrs)", price:"$300"},
+      {name:"Día completo (hasta 8 hrs)", price:"$550"},
+      {name:"Noche / evento", price:"$120/hr"}
     ]
   };
 
@@ -388,7 +373,7 @@ window.firebase = {
       }, 100);
       setTimeout(() => {
         clearInterval(interval);
-        if(!dbReady) console.error('Firebase no se cargó a tiempo');
+        console.error('Firebase no se cargó');
         resolve();
       }, 5000);
     });
@@ -434,24 +419,17 @@ window.firebase = {
 
   // ---------- init ----------
   async function init(){
-    try{
-      await waitForFirebase();
-
-      config = await safeGet('config', null);
-      if(!config){
-        config = DEFAULT_CONFIG;
-        await safeSet('config', config);
-      }
-      renderPublic();
-    }catch(e){
-      console.error('Error inicializando la app:', e);
-      config = config || DEFAULT_CONFIG;
-      renderPublic();
-    }finally{
-      document.getElementById('loading').classList.add('hidden');
-      document.getElementById('app').classList.remove('hidden');
-      attachStaticListeners();
+    await waitForFirebase();
+    
+    config = await safeGet('config', null);
+    if(!config){
+      config = DEFAULT_CONFIG;
+      await safeSet('config', config);
     }
+    renderPublic();
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    attachStaticListeners();
   }
 
   // ---------- public view ----------
@@ -494,19 +472,6 @@ window.firebase = {
     sel.appendChild(otherOpt);
   }
 
-  async function sendOwnerAlert(lead){
-    if(!config.notifyPhone || !config.notifyApiKey) return;
-    const msg = encodeURIComponent(
-      `Nueva solicitud de cita\nNombre: ${lead.name}\nTel: ${lead.phone}\nServicio: ${lead.service || '-'}\nFecha: ${lead.date || 'no especificada'}\nNota: ${lead.note || '-'}`
-    );
-    const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(config.notifyPhone)}&text=${msg}&apikey=${encodeURIComponent(config.notifyApiKey)}`;
-    try{
-      await fetch(url, {mode:'no-cors'});
-    }catch(e){
-      console.error('Alerta automática no enviada:', e);
-    }
-  }
-
   function escapeHtml(str){
     const d = document.createElement('div');
     d.textContent = str;
@@ -543,17 +508,17 @@ window.firebase = {
     e.preventDefault();
     const resultEl = document.getElementById('form-result');
     if(document.getElementById('hp-field').value){
+      // honeypot triggered, silently pretend success
       resultEl.innerHTML = '<p class="form-msg ok">¡Solicitud enviada!</p>';
       return;
     }
     const name = document.getElementById('f-name').value.trim();
-    const phone = document.getElementById('f-phone').value.trim();
     const service = document.getElementById('f-service').value;
     const date = document.getElementById('f-date').value;
     const note = document.getElementById('f-note').value.trim();
 
-    if(!name || !phone){
-      resultEl.innerHTML = '<p class="form-msg err">Por favor escribe tu nombre y teléfono.</p>';
+    if(!name){
+      resultEl.innerHTML = '<p class="form-msg err">Por favor escribe tu nombre.</p>';
       return;
     }
 
@@ -566,11 +531,11 @@ window.firebase = {
 
     const newLead = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-      name, phone, service, date, note,
+      name, service, date, note,
       createdAt: new Date().toISOString()
     };
 
-    safeSet(`leads/${newLead.id}`, newLead); // mejor esfuerzo, no bloquea el flujo de WhatsApp
+    await safeSet(`leads/${newLead.id}`, newLead);
 
     submitBtn.disabled = false;
     submitBtn.textContent = 'Enviar solicitud';
@@ -581,11 +546,10 @@ window.firebase = {
       try{ waWin.location.href = confirmUrl; }catch(err){ waWin = null; }
     }
     resultEl.innerHTML = `
-      <svg class="stamp-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="#7E9468" stroke-width="3"/><path fill="none" stroke="#7E9468" stroke-width="4" stroke-linecap="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>
+      <svg class="stamp-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="#7E9468" stroke-width="3"/><path fill="none" stroke="#7E9468" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M16 26l7 7 13-13"/></svg>
       <p class="form-msg ok">¡Listo, ${escapeHtml(name)}! Te estamos abriendo WhatsApp para confirmar tu cita.</p>
       <a class="confirm-wa" href="${confirmUrl}" target="_blank" rel="noopener">${waWin ? 'Si no se abrió solo, confirma aquí' : 'Enviar por WhatsApp'} →</a>
     `;
-    sendOwnerAlert(newLead);
   }
 
   // ---------- admin: pin ----------
@@ -604,10 +568,11 @@ window.firebase = {
 
   async function enterAdmin(){
     fillConfigForm();
-
+    
+    // Cargar leads desde Firebase
     const leadsSnapshot = await safeGet('leads', {});
     leads = Object.values(leadsSnapshot || {}).filter(l => l && l.id);
-
+    
     renderLeads();
     switchAdminTab('info');
     showView('admin-dash');
@@ -630,8 +595,6 @@ window.firebase = {
     document.getElementById('a-name').value = config.businessName || '';
     document.getElementById('a-tagline').value = config.tagline || '';
     document.getElementById('a-phone').value = config.phone || '';
-    document.getElementById('a-notify-phone').value = config.notifyPhone || '';
-    document.getElementById('a-notify-key').value = config.notifyApiKey || '';
     document.getElementById('a-pin').value = '';
     const wrap = document.getElementById('a-services');
     wrap.innerHTML = '';
@@ -670,8 +633,6 @@ window.firebase = {
       businessName: document.getElementById('a-name').value.trim() || DEFAULT_CONFIG.businessName,
       tagline: document.getElementById('a-tagline').value.trim(),
       phone: document.getElementById('a-phone').value.trim().replace(/\D/g,''),
-      notifyPhone: document.getElementById('a-notify-phone').value.trim(),
-      notifyApiKey: document.getElementById('a-notify-key').value.trim(),
       pin: newPin || config.pin || DEFAULT_CONFIG.pin,
       services
     };
@@ -697,11 +658,10 @@ window.firebase = {
       return;
     }
     const sorted = [...leads].sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
-    let html = '<table class="leads-table"><thead><tr><th>Nombre</th><th>Teléfono</th><th>Servicio</th><th>Fecha</th><th>Nota</th><th></th></tr></thead><tbody>';
+    let html = '<table class="leads-table"><thead><tr><th>Nombre</th><th>Servicio</th><th>Fecha</th><th>Nota</th><th></th></tr></thead><tbody>';
     sorted.forEach(l=>{
       html += `<tr>
         <td>${escapeHtml(l.name)}</td>
-        <td><a href="${waLink(l.phone)}" target="_blank" rel="noopener">${escapeHtml(l.phone)}</a></td>
         <td>${escapeHtml(l.service||'')}</td>
         <td>${escapeHtml(l.date||'')}</td>
         <td>${escapeHtml(l.note||'')}</td>
@@ -726,8 +686,8 @@ window.firebase = {
 
   function exportCsv(){
     if(!leads.length){ alert('No hay solicitudes para exportar.'); return; }
-    const header = ['Nombre','Telefono','Servicio','Fecha','Nota','Recibido'];
-    const rows = leads.map(l=>[l.name,l.phone,l.service,l.date,l.note,l.createdAt]);
+    const header = ['Nombre','Servicio','Fecha','Nota','Recibido'];
+    const rows = leads.map(l=>[l.name,l.service,l.date,l.note,l.createdAt]);
     const csv = [header, ...rows].map(r=>
       r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')
     ).join('\n');
